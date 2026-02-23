@@ -1,9 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { signIn, signUpWithCredentials } from "@/lib/actions/user.action";
+import { useActionState, useState } from "react";
 
 export default function SignInPage() {
   const [isLogin, setIsLogin] = useState(true);
+  const [signUpdata, signUpAction] = useActionState(signUpWithCredentials, {
+    success: false,
+    message: "",
+  });
+  const [signInData, signInAction] = useActionState(signIn, {
+    success: false,
+    message: "",
+  });
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-950 p-4">
@@ -24,7 +33,10 @@ export default function SignInPage() {
                 : "Fill in the form to get started"}
             </p>
 
-            <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+            <form
+              className="space-y-4"
+              action={!isLogin ? signUpAction : signInAction}
+            >
               <div>
                 <label
                   htmlFor="email"
@@ -35,6 +47,7 @@ export default function SignInPage() {
                 <input
                   type="email"
                   id="email"
+                  name="email"
                   placeholder="name@example.com"
                   className="w-full bg-zinc-900/50 border border-zinc-800 rounded-lg px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
                 />
@@ -50,6 +63,7 @@ export default function SignInPage() {
                 <input
                   type="password"
                   id="password"
+                  name="password"
                   placeholder="••••••••"
                   className="w-full bg-zinc-900/50 border border-zinc-800 rounded-lg px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
                 />
@@ -66,6 +80,7 @@ export default function SignInPage() {
                   <input
                     type="password"
                     id="confirm-password"
+                    name="confirm-password"
                     placeholder="••••••••"
                     className="w-full bg-zinc-900/50 border border-zinc-800 rounded-lg px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
                   />
@@ -78,6 +93,16 @@ export default function SignInPage() {
               >
                 {isLogin ? "Sign In" : "Register"}
               </button>
+
+              {signUpdata.message && (
+                <p
+                  className={`text-sm text-center mt-4 ${
+                    signUpdata.success ? "text-green-500" : "text-red-500"
+                  }`}
+                >
+                  {signUpdata.message}
+                </p>
+              )}
             </form>
 
             <div className="mt-8 text-center">

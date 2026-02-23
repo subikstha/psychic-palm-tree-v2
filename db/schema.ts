@@ -3,7 +3,7 @@ import { pgTable, varchar, timestamp, integer } from "drizzle-orm/pg-core";
 export const users = pgTable("users", {
   id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
   name: varchar("name", { length: 255 }).notNull().default("No_Name"),
-  email: varchar("email", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
   emailVerified: timestamp("email_verified", { precision: 6 }),
   image: varchar("image", { length: 255 }),
   password: varchar("password", { length: 255 }).notNull(),

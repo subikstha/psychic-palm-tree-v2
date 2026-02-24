@@ -10,11 +10,13 @@ export const signUpWithCredentials = async (
   formData: FormData,
 ) => {
   const email = formData.get("email") as string;
+  const name = formData.get("name") as string;
   const password = formData.get("password") as string;
   const hashedPassword = hashSync(password, 10);
 
   try {
     await db.insert(users).values({
+      name,
       email,
       password: hashedPassword,
     });

@@ -78,7 +78,7 @@ export const product = pgTable("product", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: varchar("name", { length: 255 }).notNull(),
   slug: varchar("slug", { length: 255 }).notNull().unique(),
-  category: varchar("category", { length: 255 }).notNull(), // Single category for now
+  category: varchar("category", { length: 255 }).notNull(),
   images: text("images").array().notNull(), // String array
   brand: varchar("brand", { length: 255 }).notNull(),
   description: text("description").notNull(),

@@ -1,6 +1,9 @@
 "use client";
 
-import { signIn, signUpWithCredentials } from "@/lib/actions/user.action";
+import {
+  signInWithCredentials,
+  signUpWithCredentials,
+} from "@/lib/actions/user.action";
 import { useActionState, useState } from "react";
 
 export default function SignInPage() {
@@ -9,7 +12,7 @@ export default function SignInPage() {
     success: false,
     message: "",
   });
-  const [signInData, signInAction] = useActionState(signIn, {
+  const [signInData, signInAction] = useActionState(signInWithCredentials, {
     success: false,
     message: "",
   });

@@ -2,7 +2,9 @@
 import db from "@/db";
 import { users } from "@/db/schema";
 import { hashSync } from "bcrypt-ts-edge";
+import { signIn } from "@/auth";
 
+// User action for registering new users
 export const signUpWithCredentials = async (
   prevState: unknown,
   formData: FormData,
@@ -11,20 +13,53 @@ export const signUpWithCredentials = async (
   const password = formData.get("password") as string;
   const hashedPassword = hashSync(password, 10);
 
-  await db.insert(users).values({
-    email,
-    password: hashedPassword,
-  });
+  try {
+    await db.insert(users).values({
+      email,
+      password: hashedPassword,
+    });
 
-  return {
-    success: true,
-    message: "User creation success",
-  };
+    await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+
+    return {
+      success: true,
+      message: "User creation success",
+    };
+  } catch (error) {
+    console.error("error when signing up", error);
+    return {
+      success: false,
+      message: "User creation failed",
+    };
+  }
 };
 
-export const signIn = async (prevState: unknown, formData: FormData) => {
-  return {
-    success: true,
-    message: "User signed in success",
-  };
+// User action for logging in existing users
+export const signInWithCredentials = async (
+  prevState: unknown,
+  formData: FormData,
+) => {
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+  try {
+    await signIn("credentials", {
+      email,
+      password,
+      redirectTo: "/",
+    });
+  } catch (error: any) {
+    if (error.type === "CredentialsSignin") {
+      return {
+        success: false,
+        message: "Invalid credentials",
+      };
+    }
+    // Auth.js uses redirect() which throws an error that should be re-thrown
+    // to let Next.js handle the redirection.
+    throw error;
+  }
 };

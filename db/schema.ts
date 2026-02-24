@@ -9,6 +9,8 @@ import {
   numeric,
   primaryKey,
   uuid,
+  boolean,
+  text,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
@@ -71,6 +73,35 @@ export const session = pgTable("session", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+export const product = pgTable("product", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 255 }).notNull().unique(),
+  category: varchar("category", { length: 255 }).notNull(), // Single category for now
+  images: text("images").array().notNull(), // String array
+  brand: varchar("brand", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  stock: integer("stock").notNull(),
+  price: decimal("price", { precision: 12, scale: 2 }).default(0).notNull(),
+  rating: decimal("rating", { precision: 12, scale: 3 }).default(0).notNull(),
+  numReviews: integer("num_reviews").default(0).notNull(),
+  isFeatured: boolean("is_featured").default(false).notNull(),
+  banner: varchar("banner", { length: 255 }),
+  createdAt: timestamp("created_at", { precision: 6 }).defaultNow().notNull(),
+});
+
+export const verificationToken = pgTable(
+  "verification_token",
+  {
+    identifier: varchar("identifier", { length: 255 }).notNull(),
+    token: varchar("token", { length: 255 }).notNull(),
+    expires: timestamp("expires", { precision: 6 }).notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.identifier, table.token] }), // Composite PK
+  ],
+);
 
 // 1. Define relatiosn for the User
 export const userRelations = relations(users, ({ many }) => ({

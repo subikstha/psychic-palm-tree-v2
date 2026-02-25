@@ -2,7 +2,7 @@
 import db from "@/db";
 import { users } from "@/db/schema";
 import { hashSync } from "bcrypt-ts-edge";
-import { signIn } from "@/auth";
+import { signIn, signOut } from "@/auth";
 
 // User action for registering new users
 export const signUpWithCredentials = async (
@@ -70,3 +70,7 @@ export const signInWithCredentials = async (
     throw error;
   }
 };
+
+export async function signOutUser() {
+  await signOut();
+}

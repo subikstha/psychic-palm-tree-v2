@@ -6,10 +6,11 @@ const ProductList = ({
   title,
   limit,
 }: {
-  data: Product[];
+  data?: Product[];
   title?: string;
   limit?: number;
 }) => {
+  if (!data) return null;
   const limitedData = limit ? data.slice(0, limit) : data;
   return (
     <div className="my-10">

@@ -53,8 +53,13 @@ export const signInWithCredentials = async (
       password,
       redirectTo: "/",
     });
-  } catch (error: any) {
-    if (error.type === "CredentialsSignin") {
+  } catch (error: unknown) {
+    if (
+      error &&
+      typeof error === "object" &&
+      "type" in error &&
+      error.type === "CredentialsSignin"
+    ) {
       return {
         success: false,
         message: "Invalid credentials",

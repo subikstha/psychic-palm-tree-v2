@@ -2,12 +2,15 @@ import { config } from "dotenv";
 config({ path: ".env.local" });
 import dns from "node:dns";
 dns.setDefaultResultOrder("ipv4first");
-import fetch from "node-fetch";
+import fetch, { RequestInit as NodeFetchRequestInit } from "node-fetch";
 import https from "node:https";
 
 const agent = new https.Agent({ family: 4 });
-const customFetch = (url: any, options: any) =>
-  fetch(url, { ...options, agent });
+const customFetch = (url: URL | string, options?: RequestInit | object) => {
+  const fetchOptions = { ...options, agent } as Record<string, unknown>;
+  if (fetchOptions.body === null) delete fetchOptions.body;
+  return fetch(url.toString(), fetchOptions as NodeFetchRequestInit);
+};
 
 import { migrate } from "drizzle-orm/neon-http/migrator";
 import { drizzle } from "drizzle-orm/neon-http";

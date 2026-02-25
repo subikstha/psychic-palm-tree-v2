@@ -1,3 +1,4 @@
+import { CartItem } from "@/types";
 import { relations } from "drizzle-orm";
 import {
   pgTable,
@@ -29,7 +30,7 @@ export const cart = pgTable("cart", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").references(() => users.id), // should be made nullable for guests
   sessionCartId: varchar("session_cart_id", { length: 255 }).notNull(),
-  items: jsonb("items").array().notNull().default([]),
+  items: jsonb("items").$type<CartItem[]>().notNull().default([]),
   itemsPrice: numeric("items_price", { precision: 12, scale: 2 }).notNull(),
   totalPrice: numeric("total_price", { precision: 12, scale: 2 }).notNull(),
   shippingPrice: numeric("shipping_price", {

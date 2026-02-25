@@ -35,7 +35,7 @@ export async function getMyCart() {
 
   //   Get cart from the data base
   try {
-    const data = await db
+    const [data] = await db
       .select()
       .from(cart)
       .where(eq(cart.userId, userId ? userId : sessionCartId));
@@ -93,5 +93,37 @@ export async function addItemToCart(data: CartItem) {
     const existItem = (existingCart.items as CartItem[]).find(
       (x) => x.productId === item.productId,
     );
+
+    if (existItem) {
+      // Check Stock
+      if (productInDb.stock < existItem.qty + 1) {
+        throw new Error("Not enough stock");
+      }
+
+      // Increase Quantity
+      (existingCart.items as CartItem[]).find(
+        (x) => x.productId === item.productId,
+      )!.qty = existItem.qty + 1;
+    } else {
+      // If item does not exist in cart
+      // Check stock
+      if (productInDb.stock < 1) throw new Error("Not Enough Stock");
+
+      // Add item to the cart.items
+      existingCart.items.push(item);
+    }
+
+    // Save to DB
+    await db
+      .update(cart)
+      .set({ items: existingCart.items, ...calcPrice(existingCart.items) })
+      .where(eq(cart.id, existingCart.id));
+
+    revalidatePath(`/product/${product.slug}`);
+
+    return {
+      success: true,
+      message: `${product.name} ${existItem ? "updated in" : "added to"} cart`,
+    };
   }
 }

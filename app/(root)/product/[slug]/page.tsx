@@ -1,7 +1,9 @@
+import AddToCart from "@/components/shared/product/add-to-cart";
 import ProductImages from "@/components/shared/product/product-images";
 import ProductPrice from "@/components/shared/product/product-price";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { getMyCart } from "@/lib/actions/cart.action";
 import { getProductBySlug } from "@/lib/actions/product.action";
 import { notFound } from "next/navigation";
 
@@ -12,9 +14,10 @@ interface Props {
 const ProductDetails = async (props: Props) => {
   const { slug } = await props.params;
   const product = await getProductBySlug(slug);
+  const cart = await getMyCart();
 
   if (!product) return notFound();
-  console.log("Product in detail page", product);
+
   return (
     <>
       <section>
@@ -63,7 +66,7 @@ const ProductDetails = async (props: Props) => {
                     <Badge variant={"destructive"}>Out of Stock</Badge>
                   )}
                 </div>
-                {/* {product.stock > 0 && (
+                {product.stock > 0 && (
                   <div className="flex-center">
                     <AddToCart
                       cart={cart}
@@ -77,7 +80,7 @@ const ProductDetails = async (props: Props) => {
                       }}
                     />
                   </div>
-                )} */}
+                )}
               </CardContent>
             </Card>
           </div>

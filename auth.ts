@@ -5,6 +5,7 @@ import { users } from "./db/schema";
 import { eq } from "drizzle-orm";
 import { compareSync } from "bcrypt-ts-edge";
 import { NextResponse } from "next/server";
+import type { NextAuthConfig } from "next-auth";
 
 export const config = {
   pages: {
@@ -22,7 +23,7 @@ export const config = {
         password: { type: "password" },
       },
 
-      // This will be called when we programmatically call the signIn function provided by next auth
+      // The authorize function will be used to do all the logic to query the DB and find the users
       async authorize(credentials, req) {
         if (credentials == null) return null;
 
@@ -42,6 +43,7 @@ export const config = {
               id: String(user.id),
               name: user.name,
               email: user.email,
+              role: user.role,
             };
           }
         }
@@ -50,7 +52,19 @@ export const config = {
     }),
   ],
   callbacks: {
-    authorized({ request }: { request: any }) {
+    // The JWT callback is used to change the jwt token for example to change the role of the user
+    async session({ session, user, trigger, token }) {
+      // Set the user id from the token to the session
+      if (session.user && token.sub) {
+        session.user.id = token.sub;
+      }
+      // To ensure that when name changes in the DB, it also gets changed in the session
+      if (trigger === "update" && user) {
+        session.user.name = user.name;
+      }
+      return session;
+    },
+    authorized({ request }) {
       // Check for session cart cookie
       if (!request.cookies.get("sessionCartId")) {
         // Generate new session cart id cookie
@@ -74,6 +88,6 @@ export const config = {
       }
     },
   },
-};
+} satisfies NextAuthConfig;
 
 export const { handlers, signIn, signOut, auth } = NextAuth(config);

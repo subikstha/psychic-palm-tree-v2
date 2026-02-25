@@ -10,6 +10,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "npx tsx db/migrate.ts",
     "db:push": "drizzle-kit push",
+    "db:seed": "npx tsx db/seed.ts",
     "prepare": "husky"
   },
   "dependencies": {
@@ -23,6 +24,7 @@
     "date-fns": "^4.1.0",
     "dotenv": "^17.3.1",
     "drizzle-orm": "^0.45.1",
+    "drizzle-seed": "^0.3.1",
     "drizzle-zod": "^0.8.3",
     "embla-carousel-react": "^8.6.0",
     "input-otp": "^1.4.2",

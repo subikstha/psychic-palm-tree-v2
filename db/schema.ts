@@ -21,7 +21,7 @@ export const users = pgTable("users", {
   emailVerified: timestamp("email_verified", { precision: 6 }),
   image: varchar("image", { length: 255 }),
   password: varchar("password", { length: 255 }).notNull(),
-  role: varchar("role", { length: 255 }),
+  role: varchar("role", { length: 255 }).notNull().default("user"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

@@ -5,7 +5,7 @@ import db from "@/db";
 import { cart, product } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
-import { convertToPlainObject, round2 } from "../utils";
+import { convertToPlainObject, formatError, round2 } from "../utils";
 import { CartItem } from "@/types";
 import { cartItemSchema, inserCartSchema } from "../validators";
 import { revalidatePath } from "next/cache";
@@ -78,7 +78,7 @@ export async function addItemToCart(data: CartItem) {
       ...calcPrice([item]),
     });
 
-    const createdCart = await db.insert(cart).values(newCart);
+    await db.insert(cart).values(newCart);
 
     // Revalidate the product page
     revalidatePath(`/product/${product.slug}`);
@@ -125,5 +125,63 @@ export async function addItemToCart(data: CartItem) {
       success: true,
       message: `${product.name} ${existItem ? "updated in" : "added to"} cart`,
     };
+  }
+}
+
+export async function removeItemFromCart(productId: string) {
+  try {
+    // Check for cart cookie
+    const sessionCartId = (await cookies()).get("sessionCartId")?.value;
+    if (!sessionCartId) throw new Error("Cart session not found");
+
+    // Get Product
+    const [productInDb] = await db
+      .select()
+      .from(product)
+      .where(eq(product.id, productId));
+
+    if (!productInDb) throw new Error("Product not found");
+
+    // Get user cart
+    const cartData = await getMyCart();
+
+    if (!cartData) throw new Error("Cart not found");
+
+    // Check for item
+    const exist = (cartData.items as CartItem[]).find(
+      (x) => x.productId === productId,
+    );
+    if (!exist) throw new Error("Item not found");
+
+    // Check if only one in quantity
+    if (exist.qty === 1) {
+      // Remove from cart
+      cartData.items = (cartData.items as CartItem[]).filter(
+        (x) => x.productId !== exist.productId,
+      );
+    } else {
+      // Decrease the quantity
+      (cartData.items as CartItem[]).find(
+        (x) => x.productId === productId,
+      )!.qty = exist.qty - 1;
+    }
+
+    // Update database
+    await db
+      .update(cart)
+      .set({
+        items: cartData.items,
+        ...calcPrice(cartData.items as CartItem[]),
+      })
+      .where(eq(cart.id, cartData.id));
+
+    revalidatePath(`/product/${productInDb.slug}`);
+
+    return {
+      success: true,
+      message: `${productInDb.name} was removed from cart`,
+    };
+  } catch (error) {
+    return { success: false, message: await formatError(error) };
   }
 }

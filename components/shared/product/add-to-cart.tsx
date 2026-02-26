@@ -1,41 +1,44 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import { Plus, Minus, Loader } from "lucide-react";
 // import { useToast } from "@/hooks/use-toast";
 // import { ToastAction } from "@/components/ui/toast";
-// import { addItemToCart, removeItemFromCart } from "@/lib/actions/cart.actions";
+
 import { useTransition } from "react";
 import { Cart, CartItem } from "@/types";
+import { addItemToCart } from "@/lib/actions/cart.action";
 
 const AddToCart = ({ cart, item }: { cart?: Cart; item: CartItem }) => {
-  const router = useRouter();
+  // const router = useRouter();
   // const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
   const handleAddToCart = async () => {
-    // startTransition(async () => {
-    //   const res = await addItemToCart(item);
-    //   if (!res.success) {
-    //     toast({
-    //       variant: "destructive",
-    //       description: res.message,
-    //     });
-    //     return;
-    //   }
-    // Handle success add to cart
-    // toast({
-    //   description: res.message,
-    //   action: (
-    //     <ToastAction
-    //       className="bg-primary text-white hover:bg-gray-800"
-    //       altText="Go To Cart"
-    //       onClick={() => router.push("/cart")}
-    //     >
-    //       Go To Cart
-    //     </ToastAction>
-    //   ),
-    // });
-    // });
+    startTransition(async () => {
+      // Server action to add items to the cart
+      const res = await addItemToCart(item);
+      if (!res.success) {
+        console.log("Items successfully added to cart", res.message);
+        // toast({
+        //   variant: "destructive",
+        //   description: res.message,
+        // });
+        return;
+      }
+      // Handle success add to cart
+      // toast({
+      //   description: res.message,
+      //   action: (
+      //     <ToastAction
+      //       className="bg-primary text-white hover:bg-gray-800"
+      //       altText="Go To Cart"
+      //       onClick={() => router.push("/cart")}
+      //     >
+      //       Go To Cart
+      //     </ToastAction>
+      //   ),
+      // });
+    });
   };
   // Handle remove from cart
   const handleRemoveFromCart = async () => {
@@ -49,7 +52,8 @@ const AddToCart = ({ cart, item }: { cart?: Cart; item: CartItem }) => {
     // });
   };
   // Check if item is in cart
-  const existItem = false;
+  const existItem =
+    cart && cart.items.find((x) => x.productId === item.productId);
   console.log("Item already in cart is", existItem);
   return existItem ? (
     <div>
@@ -60,7 +64,7 @@ const AddToCart = ({ cart, item }: { cart?: Cart; item: CartItem }) => {
           <Minus className="h-4 w-4" />
         )}
       </Button>
-      {/* <span className="px-2">{existItem.qty}</span> */}
+      <span className="px-2">{existItem.qty}</span>
       <Button type="button" variant="outline" onClick={handleAddToCart}>
         {isPending ? (
           <Loader className="size-4 animate-spin" />

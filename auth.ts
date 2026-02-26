@@ -24,7 +24,7 @@ export const config = {
       },
 
       // The authorize function will be used to do all the logic to query the DB and find the users
-      async authorize(credentials, req) {
+      async authorize(credentials) {
         if (credentials == null) return null;
 
         const [user] = await db
@@ -43,7 +43,7 @@ export const config = {
               id: String(user.id),
               name: user.name,
               email: user.email,
-              role: user.role,
+              role: user.role ?? "user",
             };
           }
         }
@@ -58,11 +58,46 @@ export const config = {
       if (session.user && token.sub) {
         session.user.id = token.sub;
       }
+      if (session.user && token.role) {
+        session.user.role = token.role as string;
+      }
+      if (session.user && token.name) {
+        session.user.name = token.name;
+      }
+      console.log("This is the token in the session after login", token);
       // To ensure that when name changes in the DB, it also gets changed in the session
-      if (trigger === "update" && user) {
+      if (trigger === "update" && user && user.name) {
         session.user.name = user.name;
       }
       return session;
+    },
+    async jwt({ session, user, trigger, token }) {
+      // Assign user fields to token
+      if (user) {
+        token.role = user.role;
+
+        // IF user has no name then use the email,
+        // Even if the default has been set to no_name, the DB is empty when it comes to
+        if (
+          user.name?.toLowerCase() === "no_name" ||
+          user.name?.toLowerCase() === ""
+        ) {
+          token.name = user.email!.split("@")[0];
+
+          // Update the DB to reflect the token name
+          try {
+            await db
+              .update(users)
+              .set({
+                name: token.name,
+              })
+              .where(eq(users.id, user.id));
+          } catch (error) {
+            console.error("Failed to update user name in DB:", error);
+          }
+        }
+      }
+      return token;
     },
     authorized({ request }) {
       // Check for session cart cookie
@@ -73,7 +108,7 @@ export const config = {
         // Clone the request headers
         const newRequestHeaders = new Headers(request.headers);
 
-        // Create new response and add the headers
+        // Create new response and add the new headers
         const response = NextResponse.next({
           request: {
             headers: newRequestHeaders,

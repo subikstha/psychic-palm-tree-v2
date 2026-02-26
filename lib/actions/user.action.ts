@@ -3,6 +3,7 @@ import db from "@/db";
 import { users } from "@/db/schema";
 import { hashSync } from "bcrypt-ts-edge";
 import { signIn, signOut } from "@/auth";
+import { eq } from "drizzle-orm";
 
 // User action for registering new users
 export const signUpWithCredentials = async (
@@ -73,4 +74,12 @@ export const signInWithCredentials = async (
 
 export async function signOutUser() {
   await signOut();
+}
+
+// Get user by id
+export async function getUserById(userId: string) {
+  const userInDb = await db.select().from(users).where(eq(users.id, userId));
+  if (!userInDb) throw new Error("user not found");
+
+  return userInDb;
 }

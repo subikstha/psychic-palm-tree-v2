@@ -15,6 +15,13 @@
       "when": 1772095691496,
       "tag": "0001_nice_titania",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1772103828486,
+      "tag": "0002_smiling_abomination",
+      "breakpoints": true
     }
   ]
 }

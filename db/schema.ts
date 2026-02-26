@@ -1,4 +1,4 @@
-import { CartItem } from "@/types";
+import { CartItem, ShippingAddress } from "@/types";
 import { relations } from "drizzle-orm";
 import {
   pgTable,
@@ -20,6 +20,7 @@ export const users = pgTable("users", {
   email: varchar("email", { length: 255 }).notNull().unique(),
   emailVerified: timestamp("email_verified", { precision: 6 }),
   image: varchar("image", { length: 255 }),
+  address: jsonb("address").$type<ShippingAddress>(),
   password: varchar("password", { length: 255 }).notNull(),
   role: varchar("role", { length: 255 }).notNull().default("user"),
   createdAt: timestamp("created_at").defaultNow().notNull(),

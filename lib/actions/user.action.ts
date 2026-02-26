@@ -78,7 +78,7 @@ export async function signOutUser() {
 
 // Get user by id
 export async function getUserById(userId: string) {
-  const userInDb = await db.select().from(users).where(eq(users.id, userId));
+  const [userInDb] = await db.select().from(users).where(eq(users.id, userId));
   if (!userInDb) throw new Error("user not found");
 
   return userInDb;

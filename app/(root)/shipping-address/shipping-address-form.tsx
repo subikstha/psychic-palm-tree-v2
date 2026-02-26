@@ -23,7 +23,11 @@ import { updateUserAddress } from "@/lib/actions/user.action";
 // import { updateUserAddress } from "@/lib/actions/user.actions";
 // import { shippingAddressDefaultValues } from '@/lib/constants';
 
-const ShippingAddressForm = ({ address }: { address: ShippingAddress }) => {
+const ShippingAddressForm = ({
+  address,
+}: {
+  address: ShippingAddress | null;
+}) => {
   const router = useRouter();
   //   const { toast } = useToast();
 

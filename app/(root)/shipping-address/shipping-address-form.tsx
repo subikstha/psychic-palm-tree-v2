@@ -19,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Loader } from "lucide-react";
+import { updateUserAddress } from "@/lib/actions/user.action";
 // import { updateUserAddress } from "@/lib/actions/user.actions";
 // import { shippingAddressDefaultValues } from '@/lib/constants';
 
@@ -38,8 +39,10 @@ const ShippingAddressForm = ({ address }: { address: ShippingAddress }) => {
   ) => {
     startTransition(async () => {
       console.log("Values submitted to the form are", values);
-      //   const res = await updateUserAddress(values);
-
+      const res = await updateUserAddress(values);
+      if (!res.success) {
+        return;
+      }
       //   if (!res.success) {
       //     // TODO: Show success toast message
       //     // toast({
@@ -49,7 +52,7 @@ const ShippingAddressForm = ({ address }: { address: ShippingAddress }) => {
       //     return;
       //   }
 
-      //   router.push("/payment-method");
+      router.push("/payment-method");
     });
   };
 

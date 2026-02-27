@@ -5,23 +5,24 @@ import { APP_NAME } from "@/lib/constants";
 
 const Header = () => {
   return (
-    <header className="w-full border-b">
-      <div className="wrapper flex-between">
+    <header className="w-full sticky top-0 z-50 bg-white/5 backdrop-blur-xl border-b border-white/10">
+      <div className="wrapper flex-between h-16">
         <div className="flex-start">
-          <Link href="/" className="flex-start">
+          <Link href="/" className="flex-start gap-2">
             <Image
               src="/images/logo.svg"
               alt={`${APP_NAME} logo`}
-              width={48}
-              height={48}
+              width={40}
+              height={40}
               priority={true}
+              className="brightness-110"
             />
-            <span className="hidden lg:block font-bold text-2xl ml-3">
+            <span className="hidden lg:block font-bold text-xl tracking-tight text-white">
               {APP_NAME}
             </span>
           </Link>
         </div>
-        <div className="space-x-2">
+        <div className="flex items-center gap-4">
           <Menu />
         </div>
       </div>

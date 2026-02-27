@@ -1,11 +1,12 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import db from "./db";
-import { users } from "./db/schema";
+import { cart, users } from "./db/schema";
 import { eq } from "drizzle-orm";
 import { compareSync } from "bcrypt-ts-edge";
 import { NextResponse } from "next/server";
 import type { NextAuthConfig } from "next-auth";
+import { cookies } from "next/headers";
 
 export const config = {
   pages: {
@@ -94,6 +95,25 @@ export const config = {
               .where(eq(users.id, user.id));
           } catch (error) {
             console.error("Failed to update user name in DB:", error);
+          }
+        }
+
+        // Need to check if the trigger is signIn or signUp in order to
+        if (trigger === "signIn" || trigger === "signUp") {
+          const cookie = await cookies();
+          const cookieSessionCartId = cookie.get("sessionCartId");
+
+          if (cookieSessionCartId) {
+            const sessionCartId = cookieSessionCartId.value;
+
+            // Delete the user's cart if any already exists
+            await db.delete(cart).where(eq(cart.userId, user.id as string));
+
+            // Assign newly logged in user to the current session cart
+            await db
+              .update(cart)
+              .set({ userId: user.id as string })
+              .where(eq(cart.sessionCartId, sessionCartId));
           }
         }
       }

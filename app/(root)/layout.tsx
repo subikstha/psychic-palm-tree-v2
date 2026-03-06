@@ -13,7 +13,7 @@ export default function RootLayout({
       <div className="pointer-events-none absolute top-1/2 left-1/2 h-[800px] w-[800px] -translate-x-1/2 -translate-y-1/2 bg-purple-500/5 blur-[150px]" />
 
       <Header />
-      <main className="wrapper relative z-10 flex-1">{children}</main>
+      <main className="wrapper relative z-10 mt-8 flex-1">{children}</main>
       {/* <Footer /> */}
     </div>
   );

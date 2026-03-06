@@ -23,6 +23,7 @@ export const users = pgTable("users", {
   address: jsonb("address").$type<ShippingAddress>(),
   password: varchar("password", { length: 255 }).notNull(),
   role: varchar("role", { length: 255 }).notNull().default("user"),
+  paymentMethod: varchar("payment_method", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

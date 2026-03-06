@@ -6,7 +6,8 @@ import { auth, signIn, signOut } from "@/auth";
 import { eq } from "drizzle-orm";
 import { ShippingAddress } from "@/types";
 import { formatError } from "../utils";
-import { shippingAddressSchema } from "../validators";
+import { paymentMethodSchema, shippingAddressSchema } from "../validators";
+import z from "zod";
 
 // User action for registering new users
 export const signUpWithCredentials = async (
@@ -106,6 +107,40 @@ export async function updateUserAddress(data: ShippingAddress) {
         address: address,
       })
       .where(eq(users.id, currentUser.id));
+
+    return {
+      success: true,
+      message: "User updated successfully",
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: formatError(error),
+    };
+  }
+}
+
+// Update user's payment method
+export async function updateUserPaymentMethod(
+  data: z.infer<typeof paymentMethodSchema>,
+) {
+  try {
+    const session = await auth();
+    const [currentUser] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, session?.user?.id ?? ""));
+
+    if (!currentUser) throw new Error("User not found");
+
+    const paymentMethod = paymentMethodSchema.parse(data);
+
+    await db
+      .update(users)
+      .set({
+        paymentMethod: paymentMethod.type,
+      })
+      .where(eq(users.id, session?.user?.id ?? ""));
 
     return {
       success: true,

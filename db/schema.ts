@@ -86,13 +86,58 @@ export const product = pgTable("product", {
   brand: varchar("brand", { length: 255 }).notNull(),
   description: text("description").notNull(),
   stock: integer("stock").notNull(),
-  price: decimal("price", { precision: 12, scale: 2 }).default("0").notNull(),
-  rating: decimal("rating", { precision: 12, scale: 3 }).default("0").notNull(),
+  price: numeric("price", { precision: 12, scale: 2 }).default("0").notNull(),
+  rating: numeric("rating", { precision: 12, scale: 3 }).default("0").notNull(),
   numReviews: integer("num_reviews").default(0).notNull(),
   isFeatured: boolean("is_featured").default(false).notNull(),
   banner: varchar("banner", { length: 255 }),
   createdAt: timestamp("created_at", { precision: 6 }).defaultNow().notNull(),
 });
+
+export const order = pgTable("order", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .references(() => users.id)
+    .notNull(),
+  shippingAddress: jsonb("shipping_address").$type<ShippingAddress>().notNull(),
+  paymentMethod: varchar("payment_method", { length: 255 }).notNull(),
+  paymentResult: jsonb("payment_result"),
+  itemsPrice: numeric("items_price", { precision: 12, scale: 2 }).notNull(),
+  shippingPrice: numeric("shipping_price", {
+    precision: 12,
+    scale: 2,
+  }).notNull(),
+  taxPrice: numeric("tax_price", { precision: 12, scale: 2 }).notNull(),
+  totalPrice: numeric("total_price", { precision: 12, scale: 2 }).notNull(),
+  isPaid: boolean("is_paid").default(false).notNull(),
+  paidAt: timestamp("paid_at", { precision: 6 }),
+  isDelivered: boolean("is_delivered").default(false).notNull(),
+  deliveredAt: timestamp("delivered_at", { precision: 6 }),
+  createdAt: timestamp("created_at", { precision: 6 }).defaultNow().notNull(),
+});
+
+export const orderItems = pgTable(
+  "order_item",
+  {
+    orderId: uuid("order_id")
+      .references(() => order.id, { onDelete: "cascade" })
+      .notNull(),
+    productId: uuid("product_id")
+      .references(() => product.id)
+      .notNull(),
+    qty: integer("qty").notNull(),
+    price: numeric("price", { precision: 12, scale: 2 }).notNull(),
+    name: varchar("name", { length: 255 }).notNull(),
+    slug: varchar("slug", { length: 255 }).notNull(),
+    image: varchar("image", { length: 255 }).notNull(),
+  },
+  (table) => [
+    primaryKey({
+      name: "orderitems_orderId_productId_pk",
+      columns: [table.orderId, table.productId],
+    }),
+  ],
+);
 
 export const verificationToken = pgTable(
   "verification_token",
@@ -106,11 +151,14 @@ export const verificationToken = pgTable(
   ],
 );
 
+// Define relations for the order
+
 // 1. Define relatiosn for the User
 export const userRelations = relations(users, ({ many }) => ({
   carts: many(cart),
   accounts: many(account),
   sessions: many(session),
+  orders: many(order),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -124,5 +172,24 @@ export const cartRelations = relations(cart, ({ one }) => ({
   user: one(users, {
     fields: [cart.userId],
     references: [users.id],
+  }),
+}));
+
+export const orderRelations = relations(order, ({ one, many }) => ({
+  user: one(users, {
+    fields: [order.userId],
+    references: [users.id],
+  }),
+  orderItems: many(orderItems),
+}));
+
+export const orderItemRelations = relations(orderItems, ({ one }) => ({
+  order: one(order, {
+    fields: [orderItems.orderId],
+    references: [order.id],
+  }),
+  product: one(product, {
+    fields: [orderItems.productId],
+    references: [product.id],
   }),
 }));

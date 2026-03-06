@@ -43,6 +43,13 @@
       "when": 1772781952915,
       "tag": "0005_dry_calypso",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1772797090487,
+      "tag": "0006_kind_smasher",
+      "breakpoints": true
     }
   ]
 }

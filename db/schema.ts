@@ -47,12 +47,16 @@ export const cart = pgTable("cart", {
 export const account = pgTable(
   "account",
   {
-    userId: uuid("user_id").references(() => users.id, {
-      onDelete: "cascade",
-    }),
-    type: varchar("type", { length: 255 }),
-    provider: varchar("provider", { length: 255 }),
-    providerAccountId: varchar("provider_account_id", { length: 255 }),
+    userId: uuid("user_id")
+      .references(() => users.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+    type: varchar("type", { length: 255 }).notNull(),
+    provider: varchar("provider", { length: 255 }).notNull(),
+    providerAccountId: varchar("provider_account_id", {
+      length: 255,
+    }).notNull(),
     refreshToken: varchar("refresh_token", { length: 255 }),
     accessToken: varchar("access_token", { length: 255 }),
     expiresAt: integer("expires_at"),

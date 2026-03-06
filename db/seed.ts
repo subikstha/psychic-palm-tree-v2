@@ -6,29 +6,37 @@ dns.setDefaultResultOrder("ipv4first");
 import fetch, { RequestInit as NodeFetchRequestInit } from "node-fetch";
 import https from "node:https";
 
-import { drizzle } from "drizzle-orm/neon-http";
-import { neon, neonConfig } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import * as schema from "./schema";
 import sampleData from "./sample-data";
 
-const agent = new https.Agent({ family: 4 });
-neonConfig.fetchFunction = (
-  url: URL | string,
-  options?: NodeFetchRequestInit | object,
-) => {
-  return fetch(url.toString(), {
-    ...options,
-    agent,
-  } as NodeFetchRequestInit);
-};
-
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl = process.env.DATABASE_URL_SUPABASE;
 if (!databaseUrl) {
   throw new Error("DATABASE_URL is not defined in .env.local");
 }
 
-const sql = neon(databaseUrl);
-const db = drizzle(sql, { schema });
+/**
+ * Handles special characters in database passwords by URL-encoding them.
+ */
+function getConnectionString(url: string) {
+  try {
+    new URL(url);
+    return url;
+  } catch (e) {
+    const match = url.match(/(postgres(?:ql)?:\/\/)([^:]+):(.+)(@.+)/);
+    if (match) {
+      const [_, proto, user, pass, rest] = match;
+      return `${proto}${user}:${encodeURIComponent(pass)}${rest}`;
+    }
+    return url;
+  }
+}
+
+const pool = new Pool({
+  connectionString: getConnectionString(databaseUrl),
+});
+const db = drizzle(pool, { schema });
 
 async function main() {
   try {

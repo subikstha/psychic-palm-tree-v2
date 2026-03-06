@@ -5,7 +5,7 @@ import { APP_NAME } from "@/lib/constants";
 
 const Header = () => {
   return (
-    <header className="w-full sticky top-0 z-50 bg-white/5 backdrop-blur-xl border-b border-white/10">
+    <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-white/5 backdrop-blur-xl">
       <div className="wrapper flex-between h-16">
         <div className="flex-start">
           <Link href="/" className="flex-start gap-2">
@@ -17,7 +17,7 @@ const Header = () => {
               priority={true}
               className="brightness-110"
             />
-            <span className="hidden lg:block font-bold text-xl tracking-tight text-white">
+            <span className="hidden text-xl font-bold tracking-tight text-white lg:block">
               {APP_NAME}
             </span>
           </Link>

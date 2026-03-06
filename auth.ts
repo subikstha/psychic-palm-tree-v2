@@ -75,6 +75,7 @@ export const config = {
     async jwt({ session, user, trigger, token }) {
       // Assign user fields to token
       if (user) {
+        token.id = user.id;
         token.role = user.role;
 
         // IF user has no name then use the email,
@@ -103,9 +104,8 @@ export const config = {
           const cookie = await cookies();
           const cookieSessionCartId = cookie.get("sessionCartId");
 
-          if (cookieSessionCartId) {
-            const sessionCartId = cookieSessionCartId.value;
-
+          const sessionCartId = cookieSessionCartId?.value;
+          if (sessionCartId) {
             // Delete the user's cart if any already exists
             await db.delete(cart).where(eq(cart.userId, user.id as string));
 

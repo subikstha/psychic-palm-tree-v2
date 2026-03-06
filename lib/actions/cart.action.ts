@@ -32,13 +32,21 @@ export async function getMyCart() {
 
   const session = await auth();
   const userId = session?.user?.id ? session.user.id : undefined;
+  console.log("Session cart id and user id", sessionCartId, userId);
+  const idToCheck = userId ? userId : sessionCartId;
+  console.log("ID to check", idToCheck);
 
   //   Get cart from the data base
   try {
     const [data] = await db
       .select()
       .from(cart)
-      .where(eq(cart.userId, userId ? userId : sessionCartId));
+      .where(
+        userId
+          ? eq(cart.userId, userId)
+          : eq(cart.sessionCartId, sessionCartId),
+      );
+    console.log("Cart data from server action", data);
     return convertToPlainObject(data);
   } catch (error) {
     console.error("Error getting cart data", error);

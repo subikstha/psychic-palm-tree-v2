@@ -119,7 +119,30 @@ export const config = {
       }
       return token;
     },
-    authorized({ request }) {
+    authorized({ auth, request }) {
+      // Array of regex patterns of paths we want to protect
+      const protectedPaths = [
+        /\/shipping-address/,
+        /\/payment-method/,
+        /\/place-order/,
+        /\/profile/,
+        /\/user\/(.*)/, // Here \ is used as the escape char and (.*) means anything after /user/, one or more chars
+        /\/order\/(.*)/,
+        /\/admin/,
+      ];
+
+      // Get the pathname from the req url object
+      const { pathname } = request.nextUrl;
+
+      // Check if user is not authenticated and accessing a protected path
+      if (!auth && protectedPaths.some((path) => path.test(pathname))) {
+        return false; // If we return false, the user gets redirected to the sign in page
+      }
+
+      // Role-based protection for /admin
+      if (pathname.startsWith("/admin") && auth?.user?.role !== "admin") {
+        return false;
+      }
       // Check for session cart cookie
       if (!request.cookies.get("sessionCartId")) {
         // Generate new session cart id cookie

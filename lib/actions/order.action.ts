@@ -6,13 +6,14 @@ import { auth } from "@/auth";
 import { getMyCart } from "./cart.action";
 import { getUserById } from "./user.action";
 import { insertOrderSchema, shippingAddressSchema } from "../validators";
-import { cart, order, orderItems } from "@/db/schema";
+import { cart, order, orderItems, product } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import db from "@/db";
 import { CartItem } from "@/types";
 
 // Create order and order items
 export async function createOrder() {
+  console.log("Create order server action called");
   try {
     const session = await auth();
     if (!session) throw new Error("User is not authenticated");
@@ -66,8 +67,25 @@ export async function createOrder() {
         .values(orderToSubmit)
         .returning();
 
-      // Create the order items from the cart items
+      // Create the order items from the cart items and update stock
       for (const item of userCart.items as CartItem[]) {
+        // Check stock
+        const [productInDb] = await tx
+          .select({ stock: product.stock })
+          .from(product)
+          .where(eq(product.id, item.productId));
+
+        if (!productInDb || productInDb.stock < item.qty) {
+          throw new Error(`Insufficient stock for ${item.name}`);
+        }
+
+        // Decrement stock
+        await tx
+          .update(product)
+          .set({ stock: productInDb.stock - item.qty })
+          .where(eq(product.id, item.productId));
+
+        // Insert order item
         await tx.insert(orderItems).values({
           ...item,
           price: item.price,
@@ -91,6 +109,7 @@ export async function createOrder() {
     });
 
     if (!insertedOrderId) throw new Error("Order could not be created");
+    console.log("inserted order id", insertedOrderId);
     return {
       success: true,
       message: "Order created",

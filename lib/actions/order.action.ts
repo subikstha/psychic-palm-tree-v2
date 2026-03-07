@@ -7,9 +7,11 @@ import { getMyCart } from "./cart.action";
 import { getUserById } from "./user.action";
 import { insertOrderSchema, shippingAddressSchema } from "../validators";
 import { cart, order, orderItems, product } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import db from "@/db";
-import { CartItem } from "@/types";
+import { CartItem, PaymentResult, PaymentResult } from "@/types";
+import { paypal } from "../paypal";
+import { revalidatePath } from "next/cache";
 
 // Create order and order items
 export async function createOrder() {
@@ -139,4 +141,154 @@ export async function getOrderById(orderId: string) {
   });
 
   return convertToPlainObject(data);
+}
+
+// Create a new paypal order
+export async function createPayPalOrder(orderId: string) {
+  try {
+    // Get order from database
+    const orderData = await db.query.order.findFirst({
+      where: eq(order.id, orderId),
+    });
+    if (orderData) {
+      // Create a new paypal order
+      const paypalOrder = await paypal.createOrder(
+        Number(orderData.totalPrice),
+      );
+
+      // Update the order with the paypalOrder
+      await db
+        .update(order)
+        .set({
+          paymentResult: {
+            id: paypalOrder.id,
+            email_address: "",
+            status: "",
+            pricePaid: 0,
+          },
+        })
+        .where(eq(order.id, orderId));
+
+      return {
+        success: true,
+        message: "Item order created successfully",
+        data: paypalOrder.id,
+      };
+    } else {
+      throw new Error("Order not found");
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: formatError(error),
+    };
+  }
+}
+
+// Approve paypal order and update order to paid
+export async function approvePayPalOrder(
+  orderId: string,
+  data: { orderID: string },
+) {
+  try {
+    // Get order from database
+    const orderData = await db.query.order.findFirst({
+      where: eq(order.id, orderId),
+    });
+    if (!orderData) throw new Error("Order not found");
+
+    const captureData = await paypal.capturePayment(data.orderID);
+
+    if (
+      !captureData ||
+      captureData.id !== (orderData.paymentResult as PaymentResult)?.id ||
+      captureData.status !== "COMPLETED"
+    ) {
+      throw new Error("Error in paypal payment");
+    }
+
+    //Update the order to paid
+    await updateOrderToPaid({
+      orderId,
+      paymentResult: {
+        id: captureData.id,
+        status: captureData.status,
+        email_address: captureData.payer.email_address,
+        pricePaid:
+          captureData.purchase_units[0].payments.captures[0].amount.value,
+      },
+    });
+
+    revalidatePath(`/order/${orderId}`);
+
+    return {
+      success: true,
+      message: "Your order has been paid",
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: formatError(error),
+    };
+  }
+}
+
+// Update order to paid
+async function updateOrderToPaid({
+  orderId,
+  paymentResult,
+}: {
+  orderId: string;
+  paymentResult?: PaymentResult;
+}) {
+  const orderData = await db.query.order.findFirst({
+    where: eq(order.id, orderId),
+    with: {
+      orderItems: true,
+    },
+  });
+
+  if (!orderData) throw new Error("Order not found");
+
+  // First check to see if it is paid
+  if (orderData.isPaid) throw new Error("Order is already paid");
+
+  // Transaction to update order and account for product stock
+  await db.transaction(async (tx) => {
+    // Iterate over the products and update the stock
+    for (const item of orderData.orderItems) {
+      await tx
+        .update(product)
+        .set({
+          stock: sql`${product.stock} - ${item.qty}`, // This ensures the subtraction happens at the database level
+        })
+        .where(eq(product.id, item.productId));
+    }
+
+    // Update the order to paid
+    await tx
+      .update(order)
+      .set({
+        isPaid: true,
+        paidAt: new Date(),
+        paymentResult,
+      })
+      .where(eq(order.id, orderId));
+  });
+
+  // Get updated order after transaction
+  const updatedOrder = await db.query.order.findFirst({
+    where: eq(order.id, orderId),
+    with: {
+      orderItems: true,
+      user: {
+        columns: {
+          name: true,
+          email: true,
+        },
+      },
+    },
+  });
+
+  if (!updatedOrder) throw new Error("Order not found");
 }

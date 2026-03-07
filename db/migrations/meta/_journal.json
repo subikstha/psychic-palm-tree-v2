@@ -22,6 +22,34 @@
       "when": 1772103828486,
       "tag": "0002_smiling_abomination",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1772777356435,
+      "tag": "0003_left_ezekiel",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1772781202609,
+      "tag": "0004_late_stepford_cuckoos",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1772781952915,
+      "tag": "0005_dry_calypso",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1772797090487,
+      "tag": "0006_kind_smasher",
+      "breakpoints": true
     }
   ]
 }

@@ -36,10 +36,10 @@ const ProductDetails = async (props: Props) => {
               <p>
                 {product.rating} of {product.numReviews} Reviews
               </p>
-              <div className="flex flex-col sm:grow sm:items-center gap-3">
+              <div className="flex flex-col gap-3 sm:grow sm:items-center">
                 <ProductPrice
                   value={Number(product.price)}
-                  className="w-24 rounded-full bg-green-100 text-green-700 px-5 py-2"
+                  className="w-24 rounded-full bg-green-100 px-5 py-2 text-green-700"
                 />
               </div>
             </div>

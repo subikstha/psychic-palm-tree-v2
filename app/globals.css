@@ -92,16 +92,16 @@
 
 @layer components {
   .glass-card {
-    @apply bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl;
+    @apply rounded-2xl border border-white/10 bg-white/5 shadow-2xl backdrop-blur-xl;
   }
   .glass-input {
-    @apply bg-zinc-900/50 border border-zinc-800 rounded-lg px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all;
+    @apply rounded-lg border border-zinc-800 bg-zinc-900/50 px-4 py-2.5 text-white transition-all placeholder:text-zinc-600 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none;
   }
   .glass-button {
-    @apply bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-lg transition-colors shadow-lg shadow-indigo-500/20 active:scale-[0.98];
+    @apply rounded-lg bg-indigo-600 py-3 font-semibold text-white shadow-lg shadow-indigo-500/20 transition-colors hover:bg-indigo-500 active:scale-[0.98];
   }
   .wrapper {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
   }
   .flex-between {
     @apply flex items-center justify-between;

@@ -12,21 +12,38 @@ const customFetch = (url: URL | string, options?: RequestInit | object) => {
   return fetch(url.toString(), fetchOptions as NodeFetchRequestInit);
 };
 
-import { migrate } from "drizzle-orm/neon-http/migrator";
-import { drizzle } from "drizzle-orm/neon-http";
-import { neon, neonConfig } from "@neondatabase/serverless";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 
-// Use node-fetch for HTTP requests since global fetch is failing in this environment
-neonConfig.fetchFunction = customFetch;
-
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl = process.env.DATABASE_URL_SUPABASE;
 
 if (!databaseUrl) {
   throw new Error("DATABASE_URL is not defined in .env.local");
 }
 
-const sql = neon(databaseUrl);
-const db = drizzle(sql);
+/**
+ * Handles special characters in database passwords by URL-encoding them.
+ */
+function getConnectionString(url: string) {
+  try {
+    new URL(url);
+    return url;
+  } catch (e) {
+    const match = url.match(/(postgres(?:ql)?:\/\/)([^:]+):(.+)(@.+)/);
+    if (match) {
+      const [_, proto, user, pass, rest] = match;
+      return `${proto}${user}:${encodeURIComponent(pass)}${rest}`;
+    }
+    return url;
+  }
+}
+
+const pool = new Pool({
+  connectionString: getConnectionString(databaseUrl),
+});
+
+const db = drizzle(pool);
 
 const main = async () => {
   try {

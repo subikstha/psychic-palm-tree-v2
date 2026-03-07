@@ -7,13 +7,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="flex h-screen flex-col bg-[#09090b] relative overflow-hidden">
+    <div className="relative flex h-screen flex-col overflow-hidden bg-[#09090b]">
       {/* Background Glows */}
-      <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500/10 blur-[120px] pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-500/5 blur-[150px] pointer-events-none" />
+      <div className="pointer-events-none absolute -top-24 -right-24 h-96 w-96 bg-indigo-500/10 blur-[120px]" />
+      <div className="pointer-events-none absolute top-1/2 left-1/2 h-[800px] w-[800px] -translate-x-1/2 -translate-y-1/2 bg-purple-500/5 blur-[150px]" />
 
       <Header />
-      <main className="flex-1 wrapper relative z-10">{children}</main>
+      <main className="wrapper relative z-10 mt-8 flex-1">{children}</main>
       {/* <Footer /> */}
     </div>
   );

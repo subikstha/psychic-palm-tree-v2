@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Loader } from "lucide-react";
 import { updateUserAddress } from "@/lib/actions/user.action";
+import { toast } from "sonner";
 // import { updateUserAddress } from "@/lib/actions/user.actions";
 // import { shippingAddressDefaultValues } from '@/lib/constants';
 
@@ -45,6 +46,7 @@ const ShippingAddressForm = ({
       console.log("Values submitted to the form are", values);
       const res = await updateUserAddress(values);
       if (!res.success) {
+        toast.error(res.message);
         return;
       }
       //   if (!res.success) {
@@ -61,14 +63,14 @@ const ShippingAddressForm = ({
   };
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
+    <div className="relative flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
       {/* Background Glows for the form */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg h-full max-h-lg bg-indigo-500/10 blur-[100px] pointer-events-none rounded-full" />
+      <div className="max-h-lg pointer-events-none absolute top-1/2 left-1/2 h-full w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-500/10 blur-[100px]" />
 
-      <div className="relative w-full max-w-md glass-card p-8 z-10">
+      <div className="glass-card relative z-10 w-full max-w-md p-8">
         <div className="mb-8">
           <h1 className="h2-bold mb-2">Shipping Address</h1>
-          <p className="text-zinc-400 text-sm">
+          <p className="text-sm text-zinc-400">
             Please enter the address where you&apos;d like your order delivered.
           </p>
         </div>
@@ -93,7 +95,7 @@ const ShippingAddressForm = ({
                         className="glass-input h-11"
                       />
                     </FormControl>
-                    <FormMessage className="text-red-400 text-xs" />
+                    <FormMessage className="text-xs text-red-400" />
                   </FormItem>
                 )}
               />
@@ -111,7 +113,7 @@ const ShippingAddressForm = ({
                         className="glass-input h-11"
                       />
                     </FormControl>
-                    <FormMessage className="text-red-400 text-xs" />
+                    <FormMessage className="text-xs text-red-400" />
                   </FormItem>
                 )}
               />
@@ -130,7 +132,7 @@ const ShippingAddressForm = ({
                           className="glass-input h-11"
                         />
                       </FormControl>
-                      <FormMessage className="text-red-400 text-xs" />
+                      <FormMessage className="text-xs text-red-400" />
                     </FormItem>
                   )}
                 />
@@ -150,7 +152,7 @@ const ShippingAddressForm = ({
                           className="glass-input h-11"
                         />
                       </FormControl>
-                      <FormMessage className="text-red-400 text-xs" />
+                      <FormMessage className="text-xs text-red-400" />
                     </FormItem>
                   )}
                 />
@@ -169,7 +171,7 @@ const ShippingAddressForm = ({
                         className="glass-input h-11"
                       />
                     </FormControl>
-                    <FormMessage className="text-red-400 text-xs" />
+                    <FormMessage className="text-xs text-red-400" />
                   </FormItem>
                 )}
               />
@@ -178,14 +180,14 @@ const ShippingAddressForm = ({
             <Button
               type="submit"
               disabled={isPending}
-              className="glass-button w-full h-12 mt-4"
+              className="glass-button mt-4 h-12 w-full"
             >
               {isPending ? (
-                <Loader className="w-5 h-5 animate-spin" />
+                <Loader className="h-5 w-5 animate-spin" />
               ) : (
                 <>
                   Continue to Payment
-                  <ArrowRight className="w-5 h-5 ml-2" />
+                  <ArrowRight className="ml-2 h-5 w-5" />
                 </>
               )}
             </Button>
